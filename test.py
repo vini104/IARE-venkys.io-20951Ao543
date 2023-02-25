@@ -1,8 +1,8 @@
-x=2
-y=3
+x=int(input())
+y=int(input())
 a=x/y
-m=480
-z=4
+m=int(input())
+z=int(input())
 n=m/x
 o=n*y
 print(o/z)
