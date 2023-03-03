@@ -1,39 +1,38 @@
 import java.util.concurrent.*;
 
-public class SubstringReverse {
-    public static String reverse(String str, int start, int end) {
-    StringBuilder sb = new StringBuilder(str.substring(start, end));
-    return sb.reverse().toString();
-  }
-
-  public static void main(String[] args) throws Exception {
-    String str = "Hello World!";
-    int start = 0;
-    int end = str.length();
-    int numThreads = Runtime.getRuntime().availableProcessors();
-
-    ExecutorService executor = Executors.newFixedThreadPool(numThreads);
-    CompletionService<String> completionService = new ExecutorCompletionService<>(executor);
-
-    int segmentLength = (end - start) / numThreads;
-
+public class ReverseSubstring {
     
-    for (int i = 0; i < numThreads; i++) {
-      final int segmentStart = start + i * segmentLength;
-      final int segmentEnd = (i == numThreads - 1) ? end : segmentStart + segmentLength;
-
-      completionService.submit(() -> reverse(str, segmentStart, segmentEnd));
+    public static void main(String[] args) throws InterruptedException, ExecutionException {
+        String str = "Hello World!";
+        int startIndex = 2;
+        int endIndex = 7;
+        
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Future<String> future = executor.submit(new ReverseTask(str, startIndex, endIndex));
+        
+        String reversed = future.get();
+        System.out.println(reversed);
+        
+        executor.shutdown();
     }
-
     
-    StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < numThreads; i++) {
-      sb.append(completionService.take().get());
+    private static class ReverseTask implements Callable<String> {
+        private String str;
+        private int startIndex;
+        private int endIndex;
+        
+        public ReverseTask(String str, int startIndex, int endIndex) {
+            this.str = str;
+            this.startIndex = startIndex;
+            this.endIndex = endIndex;
+        }
+       
+        public String call() {
+            StringBuilder sb = new StringBuilder(str);
+            String reversed = sb.substring(startIndex, endIndex + 1);
+            reversed = new StringBuilder(reversed).reverse().toString();
+            sb.replace(startIndex, endIndex + 1, reversed);
+            return sb.toString();
+        }
     }
-
-    executor.shutdown();
-
-    System.out.println(sb.reverse().toString());
-  }
 }
-
